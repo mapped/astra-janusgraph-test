@@ -1,0 +1,101 @@
+apply plugin: 'java-library'
+apply plugin: 'idea'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'maven-publish'
+apply plugin: 'org.springframework.boot'
+
+group 'com.mapped.astra'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    google()
+}
+
+sourceCompatibility = 16
+targetCompatibility = 16
+
+ext {
+    SPRING_VERSION = '5.3.14'
+    SPRING_BOOT_VERSION = '2.6.2'
+
+    HIBERNATE = '6.1.5.Final'
+    JAVAX_EL = '3.0.0'
+
+    LOGBACK = '1.2.3'
+    LOGBACK_LOGSTASH = '4.11'
+
+    DATASTAX_CASSANDRA_VERSION = '4.13.0'
+    NETTY_VERSION = '4.1.61.Final'
+    JACKSON_VERSION = '2.11.0'
+
+    FASTERXML_YAML = '2.12.4'
+
+    JANUSGRAPH = '0.6.0'
+    TINKERPOP = '3.5.1'
+}
+
+ext['spring.version'] = "${SPRING_VERSION}"
+ext['hibernate.version'] = "${HIBERNATE}"
+ext['cassandra-driver.version'] = "${DATASTAX_CASSANDRA_VERSION}"
+ext['netty.version'] = "${NETTY_VERSION}"
+ext['jackson-bom.version'] = "${JACKSON_VERSION}"
+
+configurations.all {
+    exclude group: "org.slf4j", module: "log4j-over-slf4j"
+    exclude group: "org.slf4j", module: "jcl-over-slf4j"
+    exclude group: "org.slf4j", module: "slf4j-log4j12"
+    exclude group: "log4j", module: "log4j"
+}
+
+dependencies {
+
+    api "ch.qos.logback:logback-classic:${LOGBACK}"
+    api "net.logstash.logback:logstash-logback-encoder:${LOGBACK_LOGSTASH}"
+    api 'com.google.guava:guava:29.0-jre'
+    api "javax.el:javax.el-api:${JAVAX_EL}"
+    api "org.hibernate.validator:hibernate-validator:${HIBERNATE}"
+    api("org.springframework.boot:spring-boot-starter:${SPRING_BOOT_VERSION}") {
+        exclude group: 'com.datastax.oss', module: 'java-driver-core'
+        exclude group: 'com.datastax.oss', module: 'java-driver-query-builder'
+    }
+
+    api "org.apache.tinkerpop:gremlin-core:${TINKERPOP}"
+    api "org.apache.tinkerpop:gremlin-server:${TINKERPOP}"
+
+    api "org.janusgraph:janusgraph-core:${JANUSGRAPH}"
+    api "org.janusgraph:janusgraph-cql:${JANUSGRAPH}"
+    api "org.janusgraph:janusgraph-server:${JANUSGRAPH}"
+
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:${SPRING_BOOT_VERSION}"
+}
+
+bootJar {
+    classifier = 'boot'
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+jar {
+    enabled = true
+}
+
+buildscript {
+
+    ext {
+        depManagementVersion = "1.0.11.RELEASE"
+        SPRING_BOOT_VERSION = '2.6.2'
+    }
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath("io.spring.gradle:dependency-management-plugin:${depManagementVersion}")
+        classpath ("org.springframework.boot:spring-boot-gradle-plugin:${SPRING_BOOT_VERSION}")
+    }
+}
