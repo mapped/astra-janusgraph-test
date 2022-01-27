@@ -25,7 +25,7 @@ public class Main {
     }
 
     @PostConstruct
-    public void startApplication(){
+    public void startApplication() throws InterruptedException {
 
         LOGGER.info("Application is started");
 
@@ -41,10 +41,10 @@ public class Main {
 
                 for(int i=0; i<1000; i++){
                     ++vertexId;
-                    Vertex vertex1 = traversalSource.addV().property("graphId", "ASTRA_TEST")
+                    Vertex vertex1 = traversalSource.addV().property("graphId", "ASTRA_DELETE_TEST")
                             .property("id", "id_"+vertexId)
                             .property("name", "Vertex name "+vertexId).next();
-                    Vertex vertex2 = traversalSource.addV().property("graphId", "ASTRA_TEST")
+                    Vertex vertex2 = traversalSource.addV().property("graphId", "ASTRA_DELETE_TEST")
                             .property("id", "id_"+vertexId)
                             .property("name", "Vertex name "+vertexId).next();
                     vertex1.addEdge("hasPart", vertex2);
@@ -66,7 +66,26 @@ public class Main {
             sum+=timeTook;
         }
 
-        LOGGER.info("The test case is finished. Average execution time for a test is: "+(sum/timesCollection.size())+" ms; All tests took: "+sum+" ms.");
+        LOGGER.info("Average execution time for a test is: "+(sum/timesCollection.size())+" ms; All tests took: "+sum+" ms.");
+
+        janusGraph.tx().rollback();
+
+        Thread.sleep(10000);
+
+        LOGGER.info("Start removing data.");
+
+        long start = System.currentTimeMillis();
+
+        GraphTraversalSource graphTraversalSource = janusGraph.traversal();
+
+        while (graphTraversalSource.V().has("graphId", "ASTRA_DELETE_TEST").barrier(1).limit(1).hasNext()){
+            graphTraversalSource.V().has("graphId","ASTRA_DELETE_TEST").barrier(1000).limit(1000).drop().iterate();
+            graphTraversalSource.tx().commit();
+        }
+
+        graphTraversalSource.tx().commit();
+
+        LOGGER.info("Time took to remove data: "+(System.currentTimeMillis()-start));
 
     }
 
