@@ -4,6 +4,9 @@
 java -Djanusgraph.config.path=/path/to/janusgraph/config -jar build/libs/mapped-astradb-test.jar
 ```
 
+/usr/lib/jvm/java-17-openjdk-amd64/bin/java -Djanusgraph.config.path=/root/janusGraphScylla.properties -jar build/libs/mapped-astradb-test-boot.jar
+
+
 ----
 
 Currently testing the next JanusGraph configuration:
